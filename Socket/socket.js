@@ -8,27 +8,32 @@ const server = http.createServer(app);
 
 const io = new Server(server,{
     cors:{
-       origin:["https://flowchat-nine.vercel.app/"], // <-- replace with your deployed frontend URL
+       origin: process.env.FRONTEND_URL || "https://flowchat-nine.vercel.app", // <-- replace with your deployed frontend URL
        methods:["GET","POST"],
        credentials:true
     }
 })
 
+const userSocketmap={}; //{userID, socketId}
+
 const getReceiverSocket = (receiverId) =>{
     return userSocketmap[receiverId];
-}
+};
 
-const userSocketmap={}; //{userID, socketId}
+
 io.on("connection",(socket)=>{
     const userId = socket.handshake.query.userId;
 
-    if(userId !== "undefined") userSocketmap[userId] = socket.id;
+    if(userId) 
+        userSocketmap[userId] = socket.id;
     io.emit("getOnlineUsers",Object.keys(userSocketmap))
+
     socket.on("disconnect",()=>{
-        delete userSocketmap[userId],
+        if(userId) {
+        delete userSocketmap[userId];}
         io.emit('getOnlineUsers',Object.keys(userSocketmap))
-    })
-})
+    });
+});
 
 
 module.exports = { app , io , getReceiverSocket , server}
