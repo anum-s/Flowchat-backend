@@ -19,7 +19,7 @@ dotenv.config()
 const PORT = process.env.PORT
 
 app.use(cors({
-  origin: "http://localhost:5173", // <-- replace with your deployed frontend URL
+  origin: "https://flowchat-nine.vercel.app/", // <-- replace with your deployed frontend URL
   credentials: true
 }))
 
