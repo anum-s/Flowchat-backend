@@ -3,6 +3,7 @@ const dotenv = require ('dotenv')
 const dbconnect = require ('./DB/dbconnect')
 const cookieParser = require ('cookie-parser')
 const cors = require('cors');
+const path = require('path')
 
 // For routes
 const authRouter = require ('./Routes/authuser.route')
@@ -11,16 +12,15 @@ const userRouter = require ('./Routes/user.route')
 
 // Socket
 const {app,server}  = require  ('./Socket/socket')
-
-// const __dirname = path.resolve(); // C.D
+ 
 
 
 dotenv.config()
-const PORT = process.env.PORT
+const PORT = process.env.PORT || 5000
 
 app.use(cors({
-  origin: process.env.FRONTEND_URL, // <-- replace with your deployed frontend URL
-  credentials: true
+    origin: process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL : 'http://localhost:5173',
+    credentials: true
 }))
 
 app.use(express.json());
@@ -31,17 +31,19 @@ app.use('/api/auth', authRouter)
 app.use('/api/message', messageRouter)
 app.use('/api/user', userRouter)
 
-//CODE FOR DEPLOYMENT 
 // to join frontend and backend
-// app.use(express.static(path.join(__dirname,"/frontend/dist")))
-
-// app.get("*",(req,res)=>{
-//     res.sendFile(path.join(__dirname,"frontend","dist","index.html"))
-// })
-
-app.get('/',(req,res)=>{
-    res.send("server is running successfully")
-})
+if (process.env.NODE_ENV === 'production') {
+    const __dirname = path.resolve()
+    app.use(express.static(path.join(__dirname, '/frontend/dist')))
+    
+    app.get('*', (req, res) => {
+        res.sendFile(path.join(__dirname, 'frontend', 'dist', 'index.html'))
+    })
+} else {
+    app.get('/', (req, res) => {
+        res.send('Server is running successfully')
+    })
+}
 
 //Database and server start
 

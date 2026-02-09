@@ -7,9 +7,8 @@ const jwtToken = (userId,res)=>{
     res.cookie("jwt",token,{
         maxAge : 30*24*60*60*1000,
         httpOnly: true,
-        sameSite: "none",
-        secure: true
-        // secure : process.env.SECURE !== "development"
+        sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+        secure : process.env.NODE_ENV === 'production'
     })
 }
 
